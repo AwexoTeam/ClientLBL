@@ -18,6 +18,7 @@ public class MessageHandler : MonoBehaviour
                 HandleMovementUpdate(reader);
                 break;
             case PacketType.PlayerDisconnected:
+                HandleDisconnection(reader);
                 break;
             case PacketType.PlayerSyncRequest:
                 HandlePlayerSyncRequest(reader);
@@ -25,6 +26,12 @@ public class MessageHandler : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    private void HandleDisconnection(BinaryReader reader)
+    {
+        string guid = reader.ReadString();
+        PlayerManager.instance.OnDisconnect(guid);
     }
 
     private void HandlePlayerSyncRequest(BinaryReader reader)

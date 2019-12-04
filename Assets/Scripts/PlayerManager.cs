@@ -42,6 +42,14 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    public void OnDisconnect(string guid)
+    {
+        PlayerEntity entity = otherPlayers[guid];
+        Destroy(entity.gameObject);
+
+        otherPlayers.Remove(guid);
+    }
+
     public void UpdatePosition(string guid, Vector3 pos)
     {
         if (otherPlayers.ContainsKey(guid))

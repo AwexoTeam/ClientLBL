@@ -43,26 +43,29 @@ public class NetworkManager : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Telepathy.Message msg;
-        while (client.GetNextMessage(out msg))
+        if (client.Connected)
         {
-            switch (msg.eventType)
+            Message msg;
+            while (client.GetNextMessage(out msg))
             {
-                case Telepathy.EventType.Connected:
+                switch (msg.eventType)
+                {
+                    case Telepathy.EventType.Connected:
 
-                    break;
-                case Telepathy.EventType.Data:
-                    stream = new MemoryStream(msg.data);
-                    reader = new BinaryReader(stream);
+                        break;
+                    case Telepathy.EventType.Data:
+                        stream = new MemoryStream(msg.data);
+                        reader = new BinaryReader(stream);
 
-                    PacketType type = (PacketType)reader.ReadInt32();
-                    string gID = reader.ReadString();
+                        PacketType type = (PacketType)reader.ReadInt32();
+                        string gID = reader.ReadString();
 
-                    messageHandler.HandleMessage(type, gID, reader, msg);
-                    break;
-                case Telepathy.EventType.Disconnected:
+                        messageHandler.HandleMessage(type, gID, reader, msg);
+                        break;
+                    case Telepathy.EventType.Disconnected:
 
-                    break;
+                        break;
+                }
             }
         }
     }
@@ -94,5 +97,11 @@ public class NetworkManager : MonoBehaviour
     public void Send(Packet packet)
     {
         client.Send(packet.buffer);
+    }
+
+    void OnApplicationQuit()
+    {
+        GUID = "null";
+        client.Disconnect();
     }
 }
