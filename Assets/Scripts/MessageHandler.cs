@@ -14,16 +14,49 @@ public class MessageHandler : MonoBehaviour
             case PacketType.LoginAnswer:
                 HandleLoginAnswer(reader);
                 break;
-            case PacketType.MovementUpdate:
+            case PacketType.MovementRequest:
                 HandleMovementUpdate(reader);
-                break;
-            case PacketType.PlayerConnected:
-                HandlePlayerConnected(reader);
                 break;
             case PacketType.PlayerDisconnected:
                 break;
+            case PacketType.PlayerSyncRequest:
+                HandlePlayerSyncRequest(reader);
+                break;
             default:
                 break;
+        }
+    }
+
+    private void HandlePlayerSyncRequest(BinaryReader reader)
+    {
+        int length = reader.ReadInt32();
+        Debug.Log("Length of: " + length);
+
+        for (int i = 0; i < length; i++)
+        {
+            string guid = reader.ReadString();
+
+            float cPosX = reader.ReadSingle();
+            float cPosY = reader.ReadSingle();
+            float cPosZ = reader.ReadSingle();
+
+            float tPosX = reader.ReadSingle();
+            float tPosY = reader.ReadSingle();
+            float tPosZ = reader.ReadSingle();
+
+            Vector3 currPos = new Vector3(cPosX, cPosY, cPosZ);
+            Vector3 targetPos = new Vector3(tPosX, tPosY, tPosZ);
+
+            if (PlayerManager.instance.DoesPlayerExist(guid))
+            {
+                Debug.Log("Player is not initiated");
+                PlayerManager.instance.UpdateMovement(guid, targetPos);
+            }
+            else
+            {
+                Debug.Log("Player is not initiated");
+                PlayerManager.instance.RegisterPlayer(guid, currPos, targetPos);
+            }
         }
     }
 
@@ -38,21 +71,7 @@ public class MessageHandler : MonoBehaviour
 
         PlayerManager.instance.UpdateMovement(guid, pos);
     }
-
-    private void HandlePlayerConnected(BinaryReader reader)
-    {
-        string guid = reader.ReadString();
-        if (guid != NetworkManager.instance.GUID)
-        {
-            GameObject gObj = Instantiate(NetworkManager.instance.playerprefab);
-            gObj.GetComponent<MeshRenderer>().material = NetworkManager.instance.notPlayerMat;
-            PlayerEntity entity = gObj.GetComponent<PlayerEntity>();
-            entity.GUID = guid;
-
-            PlayerManager.instance.RegisterPlayer(entity, guid);
-        }
-    }
-
+    
     public void HandleLoginAnswer(BinaryReader reader)
     {
         string guid = "null";
@@ -60,15 +79,8 @@ public class MessageHandler : MonoBehaviour
         if (reader.ReadBoolean())
         {
             guid = reader.ReadString();
-            GameObject gObj = Instantiate(NetworkManager.instance.playerprefab);
-            gObj.GetComponent<MeshRenderer>().material = NetworkManager.instance.playerMat;
-            PlayerEntity entity = gObj.GetComponent<PlayerEntity>();
-            entity.GUID = guid;
-
-            PlayerManager.instance.RegisterPlayer(entity, guid);
-            gObj.AddComponent<Player>().entityData = gObj.GetComponent<PlayerEntity>();
+            NetworkManager.instance.GUID = guid;
         }
         else { Debug.Log("Login was not successful."); }
-        NetworkManager.instance.GUID = guid;
     }
 }

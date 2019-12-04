@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
     private void Start()
     {
         cam = NetworkManager.instance.mainCamera;
+        InvokeRepeating("TransformSync", 0, PlayerManager.instance.updateFrequency);
     }
 
     private void Update()
@@ -22,7 +23,7 @@ public class Player : MonoBehaviour
             
             if (Physics.Raycast(ray, out hit))
             {
-                Packet packet = new Packet(PacketType.MovementUpdate);
+                Packet packet = new Packet(PacketType.MovementRequest);
                 packet.BeginWrite();
                 packet.writer.Write(entityData.GUID);
                 packet.writer.Write(hit.point.x);
@@ -33,5 +34,10 @@ public class Player : MonoBehaviour
                 NetworkManager.instance.Send(packet);
             }
         }
+    }
+
+    private void TransformSync()
+    {
+        PlayerManager.instance.SyncPosition(entityData.currPosition);
     }
 }

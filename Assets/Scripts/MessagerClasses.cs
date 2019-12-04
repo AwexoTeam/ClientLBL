@@ -9,8 +9,9 @@ public enum PacketType
     Unknown,
     LoginRequest,
     LoginAnswer,
-    MovementUpdate,
-    PlayerConnected,
+    MovementRequest,
+    PositionUpdate,
+    PlayerSyncRequest,
     PlayerDisconnected,
 }
 
