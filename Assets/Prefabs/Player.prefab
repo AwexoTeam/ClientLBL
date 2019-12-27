@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agent: {fileID: 8869828506233373422}
+  avatar: {fileID: 6627817598125895793}
   targetPosition: {x: 0, y: 0, z: 0}
   needUpdate: 0
   characterID: 0
@@ -62,7 +63,7 @@ NavMeshAgent:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5683997693472231746}
-  m_Enabled: 1
+  m_Enabled: 0
   m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 3.5
@@ -140,3 +141,15 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 6627817598133122257}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &6627817598125895793 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 11453600, guid: 5c80fc4442f8349969abea6c1a0f1faa,
+    type: 3}
+  m_PrefabInstance: {fileID: 6627817598133122257}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcffb0a198605474c8a4d1c67c1515fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
