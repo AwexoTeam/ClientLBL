@@ -41,10 +41,13 @@ public class CharacterCreation : MonoBehaviour
     public void OnCreate()
     {
 
-        string pronoun = "him/his";
-        
-        CharacterCreationRequest characterPacket =
-            new CharacterCreationRequest(characterName.text, pronoun, raceIndex);
+        CharacterCreationRequest characterPacket = new CharacterCreationRequest
+        {
+            name = characterName.text,
+            genativPronoun = "his",
+            referalPronoun = "him",
+            bodyType = raceIndex
+        };
         
         characterPacket.height = characterValues[UmaSliderType.height];
         characterPacket.weight = characterValues[UmaSliderType.belly];

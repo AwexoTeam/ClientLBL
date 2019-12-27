@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Telepathy;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,15 +16,25 @@ public enum NetworkState
     LoggedIn,
 }
 
+public enum ConsoleLevel
+{
+    Minimal,
+    Default,
+    Verbose,
+    Debug,
+}
+
 public class NetworkManager : MonoBehaviour
 {
+    [Header("Base Server Info")]
     public static NetworkManager instance;
     //TODO: static local player variable.
     public Client client;
     public int localPlayerID;
-
+    public ConsoleLevel level;
     public NetworkState state;
     public string ip;
+    public GameObject playerPrefab;
 
     private void Awake()
     {
@@ -63,27 +74,36 @@ public class NetworkManager : MonoBehaviour
                     PacketType type = (PacketType)reader.ReadInt32();
                     int id = reader.ReadInt32();
 
-                    switch (type)
-                    {
-                        case PacketType.Unknown:
-                            break;
-                        case PacketType.LoginAnswer:
-                            ProcessLoginAnswer(reader);
-                            break;
-                        case PacketType.CharacterCreationAnswer:
-                            ProcessCharacterAnswer(reader);
-                            break;
-                        case PacketType.PositionUpdate:
-                            break;
-                        case PacketType.PlayerDisconnected:
-                            break;
-                        case PacketType.UmaCharacterPacket:
-                            break;
-                        default:
-                            break;
-                    }
+                    Packet packet = GetPacketByType(type);
+                    if(level >= ConsoleLevel.Debug)
+                        Debug.Log("R: " + type);
+
+                    packet.Deserialize(reader);
+                    packet.OnRecieve(msg);
+                    
                 }
             }
+        }
+    }
+
+    private Packet GetPacketByType(PacketType type)
+    {
+        switch (type)
+        {
+            case PacketType.LoginAnswer:
+                return new LoginAnswer();
+
+            case PacketType.CharacterCreationAnswer:
+                return new CharacterCreationAnswer();
+
+            case PacketType.PlayerSyncAnswer:
+                return new PlayerSyncAnswer();
+
+            case PacketType.PlayerMovementUpdate:
+                return new PlayerMovementUpdate();
+
+            default:
+                return null;
         }
     }
 
@@ -95,52 +115,22 @@ public class NetworkManager : MonoBehaviour
 
         state = NetworkState.ProcessingLogin;
     }
-
-    public void ProcessLoginAnswer(BinaryReader reader)
-    {
-        LoginAnswer answer = new LoginAnswer();
-        answer.Deserialize(reader);
-        
-        if (answer.canLogin)
-        {
-            localPlayerID = answer.characterID;
-
-            if (answer.hasCharacter)
-            {
-                state = NetworkState.LoggedIn;
-                SceneManager.LoadScene(2);
-            }
-            else
-            {
-                state = NetworkState.CharacterScreen;
-                SceneManager.LoadScene(1);
-            }
-        }
-        else
-        {
-            state = NetworkState.NotLoggedIn;
-            client.Disconnect();
-            Debug.Log("Couldnt login");
-        }
-    }
-
-    public void ProcessCharacterAnswer(BinaryReader reader)
-    {
-        CharacterCreationAnswer answer = new CharacterCreationAnswer();
-        answer.Deserialize(reader);
-
-        if (answer.canCreate)
-        {
-            SceneManager.LoadScene(2);
-        }
-        else
-        {
-            Debug.LogWarning("Name already taken or other error idfk demo build");
-        }
-    }
-
+    
     public void Send(Packet packet)
     {
+        if (level >= ConsoleLevel.Debug)
+            Debug.Log("S: " + packet.type);
+
         client.Send(packet.buffer);
+    }
+
+    private void OnLevelWasLoaded(int level)
+    {
+        if(level == 2)
+        {
+            PlayerSyncRequest request = new PlayerSyncRequest();
+            request.Serialize();
+            Send(request);
+        }
     }
 }

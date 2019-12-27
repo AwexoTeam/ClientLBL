@@ -12,6 +12,6 @@ EditorBuildSettings:
     path: Assets/Scenes/CharacterScreen.unity
     guid: 9bef961890d05d8458ae445ca80326c6
   - enabled: 1
-    path: Assets/Scenes/Ingame.unity
+    path: Assets/Scenes/Maps/Ingame.unity
     guid: fc4b1faa15ee30647a8f20784ff8888b
   m_configObjects: {}
